@@ -1,0 +1,106 @@
+/* Reset some basic stuff */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f4f8;
+  margin: 40px auto;
+  max-width: 700px;
+  color: #333;
+  padding: 0 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #222;
+}
+
+.controls {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+button {
+  font-size: 1.1rem;
+  padding: 12px 25px;
+  margin: 0 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+
+#output {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.chat-bubble {
+  max-width: 80%;
+  padding: 10px 15px;
+  margin: 5px 0;
+  border-radius: 18px;
+  line-height: 1.4;
+  position: relative;
+  word-wrap: break-word;
+}
+
+.chat-bubble.user {
+  background: #007bff;
+  color: white;
+  margin-left: auto;
+  border-bottom-right-radius: 5px;
+}
+
+.chat-bubble.user.interim {
+  opacity: 0.7;
+}
+
+.chat-bubble.ai {
+  background: #e9ecef;
+  color: #212529;
+  margin-right: auto;
+  border-bottom-left-radius: 5px;
+}
+
+.status-message {
+  text-align: center;
+  color: #6c757d;
+  font-size: 0.9em;
+  margin: 10px 0;
+  font-style: italic;
+}
+
+.status-message.error {
+  color: #dc3545;
+}
+
+.status-message.status {
+  color: #17a2b8;
+}
+
+#startBtn, #stopBtn {
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+#stopBtn {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+#stopBtn:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
