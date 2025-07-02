@@ -53,6 +53,14 @@ Once all details are collected, reply like:
 
 ---
 
+When the conversation starts or when you receive the first user message, reply:
+
+"Hi, I'm your Telegram assistant. How can I help you?"
+
+Then proceed with your usual behavior: support only these 5 services... [rest of the prompt]
+
+---
+
 🧪 Examples:
 
 **User:** I want to send a message  
