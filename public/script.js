@@ -9,6 +9,7 @@ let isSpeaking = false;
 let pollingInterval = null;
 const POLLING_INTERVAL = 1000;
 const POLLING_TIMEOUT = 15000;
+const SILENCE_DELAY = 1000; // 1 second silence detection
 
 // Initialize speech recognition
 if ('webkitSpeechRecognition' in window) {
@@ -25,47 +26,47 @@ if (recognition) {
   recognition.lang = 'en-US';
 
   recognition.onstart = () => {
-    appendStatusMessage("Listening...", 'status');
+    appendStatusMessage("Listening...");
     finalTranscript = '';
+    isSpeaking = false;
   };
 
   recognition.onresult = (event) => {
     let interimTranscript = '';
-    // Reset final transcript on new speech segment
-    if (event.resultIndex === 0) {
-      finalTranscript = '';
-    }
-    
     for (let i = event.resultIndex; i < event.results.length; i++) {
       const transcript = event.results[i][0].transcript;
       if (event.results[i].isFinal) {
-        finalTranscript += transcript;
+        finalTranscript += transcript + ' ';
       } else {
-        interimTranscript = transcript;
+        interimTranscript += transcript;
       }
     }
     
-    updateUserBubble(finalTranscript || interimTranscript, !!finalTranscript);
+    updateLatestUserBubble(finalTranscript.trim(), interimTranscript);
     
+    // Reset the silence timer whenever we get new results
     clearTimeout(silenceTimeout);
     silenceTimeout = setTimeout(() => {
-      recognition.stop();
-    }, 1000);
+      if (finalTranscript.trim() !== '' && !isSpeaking) {
+        recognition.stop();
+      }
+    }, SILENCE_DELAY);
   };
 
   recognition.onerror = (event) => {
     console.error("Speech Recognition Error:", event.error);
     appendStatusMessage("Error: " + event.error, 'error');
     stopPolling();
+    isSpeaking = false;
   };
 
   recognition.onend = () => {
     startBtn.disabled = false;
     stopBtn.disabled = true;
 
-    if (finalTranscript.trim() !== '') {
+    if (finalTranscript.trim() !== '' && !isSpeaking) {
       sendToN8N(finalTranscript.trim());
-    } else {
+    } else if (finalTranscript.trim() === '') {
       appendStatusMessage("No speech detected. Click Start to try again.", 'info');
       stopPolling();
     }
@@ -81,6 +82,7 @@ if (recognition) {
     clearTimeout(silenceTimeout);
     recognition.stop();
     stopPolling();
+    isSpeaking = false;
   });
 }
 
@@ -89,12 +91,6 @@ function clearChat() {
 }
 
 function appendStatusMessage(msg, type = 'info') {
-  // Remove previous status messages of same type
-  const existing = output.querySelector(`.status-message.${type}`);
-  if (existing) {
-    output.removeChild(existing);
-  }
-  
   const div = document.createElement('div');
   div.className = `status-message ${type}`;
   div.textContent = msg;
@@ -102,46 +98,57 @@ function appendStatusMessage(msg, type = 'info') {
   output.scrollTop = output.scrollHeight;
 }
 
-function updateUserBubble(text, isFinal) {
+function updateLatestUserBubble(finalText, interimText) {
   const lastUserBubble = output.querySelector('.chat-bubble.user:last-child');
   
-  // Remove previous bubble if it wasn't final
-  if (lastUserBubble && !lastUserBubble.classList.contains('final')) {
-    output.removeChild(lastUserBubble);
+  if (finalText) {
+    // Final text received, create permanent bubble
+    if (lastUserBubble && !lastUserBubble.classList.contains('final')) {
+      output.removeChild(lastUserBubble);
+    }
+    appendUserMessage(finalText, true);
+  } else if (interimText) {
+    // Interim text, update temporary bubble
+    if (lastUserBubble && !lastUserBubble.classList.contains('final')) {
+      lastUserBubble.textContent = interimText;
+    } else {
+      appendUserMessage(interimText, false);
+    }
   }
   
-  // Only add new bubble if we have content and either:
-  // - It's final, or
-  // - There isn't already a final bubble
-  if (text && (isFinal || !output.querySelector('.chat-bubble.user.final'))) {
-    const div = document.createElement('div');
-    div.className = `chat-bubble user ${isFinal ? 'final' : 'interim'}`;
-    div.textContent = text;
-    output.appendChild(div);
-    output.scrollTop = output.scrollHeight;
-  }
+  output.scrollTop = output.scrollHeight;
 }
 
-function appendAiMessage(text) {
-  // Remove any "AI is thinking" status
-  const thinkingStatus = output.querySelector('.status-message.status');
-  if (thinkingStatus) {
-    output.removeChild(thinkingStatus);
-  }
-
+function appendUserMessage(text, isFinal) {
   const div = document.createElement('div');
-  div.className = 'chat-bubble ai';
+  div.className = `chat-bubble user ${isFinal ? 'final' : 'interim'}`;
   div.textContent = text;
   output.appendChild(div);
   output.scrollTop = output.scrollHeight;
 }
 
+function appendAiMessage(text) {
+  // Remove any interim AI messages
+  const existingAi = output.querySelector('.chat-bubble.ai.interim');
+  if (existingAi) {
+    output.removeChild(existingAi);
+  }
+
+  const div = document.createElement('div');
+  div.className = 'chat-bubble ai final';
+  div.innerHTML = formatAIResponse(text);
+  output.appendChild(div);
+  output.scrollTop = output.scrollHeight;
+}
+
+function formatAIResponse(text) {
+  // Simple formatting for AI responses
+  return text.split('\n').filter(line => line.trim()).join('<br>');
+}
+
 function sendToN8N(text) {
   isSpeaking = true;
-  
-  // Show thinking status before making the request
   appendStatusMessage("AI is thinking...", 'status');
-  
   stopPolling();
 
   const pollingTimeout = setTimeout(() => {
@@ -171,7 +178,7 @@ function sendToN8N(text) {
     .catch(error => console.error("Polling error:", error));
   }, POLLING_INTERVAL);
 
-  fetch('https://issambel.app.n8n.cloud/webhook/3b6ad237-2fa7-49cb-a7c7-6741f9755a4e', {
+  fetch('https://issambel.app.n8n.cloud/webhook/7d681245-f864-4cd1-bfba-9de30f588592', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message: text })
@@ -186,9 +193,13 @@ function sendToN8N(text) {
 }
 
 function processAiResponse(reply) {
-  const aiReply = reply.toString().trim();
-  appendAiMessage(aiReply);
-  speakText(aiReply, () => {
+  const statusMessages = document.querySelectorAll('.status-message');
+  if (statusMessages.length > 0) {
+    statusMessages[statusMessages.length - 1].remove();
+  }
+  
+  appendAiMessage(reply.toString().trim());
+  speakText(reply, () => {
     isSpeaking = false;
     startRecognition();
   });
