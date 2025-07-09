@@ -1,36 +1,28 @@
-'use strict';
-const express     = require('express');
-const bodyParser  = require('body-parser');
-const fccTesting  = require('./freeCodeCamp/fcctesting.js');
-const app         = express();
+const express = require('express');
+const path = require('path');
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-fccTesting(app);
+// Middleware
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(express.static('public')); // serve static files from /public
-
-app.use(bodyParser.json());
-
-let lastAiReply = null;
-const pendingRequests = {};
+// AI Response Storage
+let lastAiResponse = ''; // This must be outside the route
 
 app.post('/receive-ai', (req, res) => {
-  console.log("Received AI response:", req.body);
-  lastAiReply = req.body;
-  res.json({ status: 'ok' });
+  lastAiResponse = req.body.message || req.body.messsage || ''; // typo-safe
+  console.log('📩 Received AI response:', lastAiResponse);
+  res.json({ status: 'received' });
 });
+
 
 app.get('/get-ai-reply', (req, res) => {
-  if (lastAiReply) {
-    const reply = lastAiReply;
-    lastAiReply = null; // Clear after sending
-    res.json(reply);
-  } else {
-    res.json({ reply: null });
-  }
+  res.json({ text: lastAiResponse });
 });
 
-
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log("Listening on port:", PORT);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`➡️  POST http://localhost:${PORT}/receive-ai`);
+  console.log(`⬅️  GET http://localhost:${PORT}/get-ai-reply`);
 });

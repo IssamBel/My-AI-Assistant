@@ -1,23 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Speech to Text with AI Chat</title>
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice-to-Text Chatbot</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@deepgram/sdk"></script>
+    <!-- Load as modules -->
+    <script type="module" src="reply.js"></script>
+    <script type="module" src="deepgram.js"></script>
+    <script type="module" src="webhook.js"></script>
 </head>
 <body>
-  <h1>Speech to Text with AI Chat</h1>
-
-  <div class="controls">
-    <button id="startBtn">Start Recording</button>
-    <button id="stopBtn" disabled>Stop Recording</button>
-  </div>
-
-  <div id="output">
-    <p><em>Press "Start Recording" and speak.</em></p>
-  </div>
-
-  <script src="script.js"></script>
+    <div class="container">
+        <h1>VOICE CHATBOT</h1>
+        <select id="languageSelector" class="language-selector">
+            <option value="english">ENGLISH</option>
+            <option value="french">FRANÇAIS</option>
+        </select>
+        <button id="micButton" class="mic-button">
+            <!-- Mic SVG icon -->
+        </button>
+        <div id="transcriptBox" class="transcript-box"></div>
+    </div>
+    
 </body>
 </html>

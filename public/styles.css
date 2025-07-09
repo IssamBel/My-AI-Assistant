@@ -1,106 +1,258 @@
-/* Reset some basic stuff */
+/* Color Variables */
+:root {
+  --bg-color: #000000;
+  --card-bg: #111111;
+  --primary-text: #ffffff;
+  --secondary-text: #aaaaaa;
+  --tertiary-text: #444444;
+  --accent-color: #ffffff;
+  --border-color: #333333;
+  --highlight-color: #666666;
+}
+
+/* Base Styles */
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f0f4f8;
-  margin: 40px auto;
-  max-width: 700px;
-  color: #333;
-  padding: 0 20px;
+  font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--primary-text);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
 }
 
+.container {
+  width: 100%;
+  max-width: 800px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* Header */
 h1 {
+  font-weight: 300;
+  letter-spacing: 0.5rem;
+  text-transform: uppercase;
+  font-size: 1.75rem;
+  color: var(--secondary-text);
   text-align: center;
-  margin-bottom: 30px;
-  color: #222;
+  margin-bottom: 1rem;
 }
 
-.controls {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-button {
-  font-size: 1.1rem;
-  padding: 12px 25px;
-  margin: 0 10px;
-  border-radius: 6px;
-  border: none;
+/* Language Selector */
+.language-selector {
+  width: 240px;
+  padding: 1rem 1.5rem;
+  background-color: var(--card-bg);
+  color: var(--primary-text);
+  border: 1px solid var(--border-color);
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 300;
+  letter-spacing: 0.05rem;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1.5rem center;
+  background-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
 }
 
+.language-selector:hover {
+  border-color: var(--secondary-text);
+  transform: translateY(-1px);
+}
 
-#output {
-  max-height: 70vh;
+.language-selector:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+/* Microphone Button */
+.mic-button {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.mic-button:hover {
+  border-color: var(--secondary-text);
+  transform: scale(1.05);
+}
+
+.mic-button:active {
+  transform: scale(0.95);
+}
+
+.mic-button svg {
+  fill: var(--primary-text);
+  width: 60px;
+  height: 60px;
+}
+
+.mic-button.listening {
+  background: var(--primary-text);
+  animation: pulse 1.5s infinite;
+}
+
+.mic-button.listening svg {
+  fill: var(--bg-color);
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5); }
+  70% { box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+/* Transcript Box */
+.transcript-box {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  min-height: 200px;
+  max-height: 300px;
+  width: 100%;
+  padding: 2rem;
+  text-align: left;
+  font-size: 1.2rem;
+  line-height: 1.6;
   overflow-y: auto;
-  padding: 15px;
-  background: #f9f9f9;
-  border-radius: 10px;
-  margin-bottom: 15px;
+  transition: border-color 0.3s;
 }
 
-.chat-bubble {
-  max-width: 80%;
-  padding: 10px 15px;
-  margin: 5px 0;
-  border-radius: 18px;
-  line-height: 1.4;
-  position: relative;
-  word-wrap: break-word;
+.transcript-box.active {
+  border-color: var(--secondary-text);
 }
 
-.chat-bubble.user {
-  background: #007bff;
-  color: white;
-  margin-left: auto;
-  border-bottom-right-radius: 5px;
-}
-
-.chat-bubble.user.interim {
-  opacity: 0.7;
-}
-
-.chat-bubble.ai {
-  background: #e9ecef;
-  color: #212529;
-  margin-right: auto;
-  border-bottom-left-radius: 5px;
-}
-
-.status-message {
-  text-align: center;
-  color: #6c757d;
-  font-size: 0.9em;
-  margin: 10px 0;
+/* Transcript Text Styles */
+.status {
+  color: var(--secondary-text);
   font-style: italic;
+  text-align: center;
 }
 
-.status-message.error {
-  color: #dc3545;
+.error {
+  color: #ff4444;
+  font-weight: bold;
 }
 
-.status-message.status {
-  color: #17a2b8;
+.phrase {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 0.5rem;
+  color: var(--primary-text);
+  animation: fadeIn 0.3s ease-out;
 }
 
-#startBtn, #stopBtn {
-  padding: 8px 20px;
-  border-radius: 20px;
-  font-weight: 500;
-  transition: all 0.3s;
+.current-phrase {
+  padding: 0.5rem 0;
+  color: var(--secondary-text);
+  font-style: italic;
+  animation: fadeIn 0.3s ease-out;
 }
 
-#stopBtn {
-  background-color: #dc3545;
-  border-color: #dc3545;
+.phrase-marker {
+  color: var(--highlight-color);
+  font-weight: bold;
+  margin-right: 0.5rem;
 }
 
-#stopBtn:hover {
-  background-color: #c82333;
-  border-color: #bd2130;
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scrollbar Styling */
+.transcript-box::-webkit-scrollbar {
+  width: 8px;
+}
+
+.transcript-box::-webkit-scrollbar-track {
+  background: var(--card-bg);
+  border-radius: 0 12px 12px 0;
+}
+
+.transcript-box::-webkit-scrollbar-thumb {
+  background: var(--highlight-color);
+  border-radius: 4px;
+}
+
+.transcript-box::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary-text);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+    letter-spacing: 0.3rem;
+  }
+  
+  .mic-button {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .transcript-box {
+    padding: 1.5rem;
+    min-height: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+  
+  h1 {
+    font-size: 1.25rem;
+  }
+  
+  .language-selector {
+    width: 200px;
+    padding: 0.75rem 1.25rem;
+  }
+  
+  .transcript-box {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+}
+
+
+.ai-phrase {
+  background: rgba(40, 40, 40, 0.8);
+  border-left: 5px solid #4a90e2;
+}
+
+.ai-phrase .phrase-marker {
+  color: #4a90e2;
+  font-weight: bold;
 }
